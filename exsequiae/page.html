@@ -3,9 +3,9 @@ $def with (site_title, base_url, term, definition, metadata, years, author_name)
 <!DOCTYPE html>
 <html>
 <head>
- <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
- <title>$site_title - $term</title>
- <style>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>$site_title - $term</title>
+<style>
 body {
   font-family: georgia;
   margin: 0;
@@ -13,37 +13,37 @@ body {
 }
 
 h1 {
-margin: 0;
-font-weight: normal;
-font-size: 30pt;
-padding: 10px;
-background-color: #D3C19A;
-color: #444;
-border-bottom: 1 px solid #715F3A;
+  margin: 0;
+  font-weight: normal;
+  font-size: 30pt;
+  padding: 10px;
+  background-color: #D3C19A;
+  color: #444;
+  border-bottom: 1 px solid #715F3A;
 }
 
 h1 small {
-color: #666;
-font-size: 16pt;
+  color: #666;
+  font-size: 16pt;
 }
 
 h1 a {
- color: #444;
- text-decoration: none;
+  color: #444;
+  text-decoration: none;
 }
 
 div#content {
-padding: 10px;
-min-height: 400px;
-background: white;
+  padding: 10px;
+  min-height: 400px;
+  background: white;
 }
 
 div#footer {
-padding: 10px;
-color: #555;
-text-align: right;
-background-color: #D3C19A;
-border-top: 1px solid #715F3A;
+  padding: 10px;
+  color: #555;
+  text-align: right;
+  background-color: #D3C19A;
+  border-top: 1px solid #715F3A;
 }
 
 span.language {
@@ -77,28 +77,28 @@ span.warning {
 <div id="content">
 
 <div style="float:right">
-$if metadata.get('type',None):
-  <span class="type">$metadata['type']</span>
-$if metadata.get('language',None):
-  <span class="language">$metadata['language'].name</span>
+  $if metadata.get('type',None):
+      <span class="type">$metadata['type']</span>
+  $if metadata.get('language',None):
+      <span class="language">$metadata['language'].name</span>
 </div>
 $if metadata.get('status',None) == 'incomplete':
-  <span class="warning">This text is still unfinished</span>
+    <span class="warning">This text is still unfinished</span>
 
-  $:definition
+$:definition
 
 <span class="documentDate">
 $if metadata.get('date',None):
-  $metadata['date'].strftime("%d %b %Y")
+    $metadata['date'].strftime("%d %b %Y")
 </span>
 
 </div>
 <div id="footer">
-$author_name
-$if metadata.get('date',None):
-   $metadata['date'].strftime("%Y")
-$else:
-   $', '.join(years)
+  $author_name
+  $if metadata.get('date',None):
+      $metadata['date'].strftime("%Y")
+  $else:
+      $', '.join(years)
 </div>
 </body>
 </html>
