@@ -1,8 +1,0 @@
-config = {
-       'baseURL': "http://localhost/mycyclopedia",
-       'dictDir': "/var/whatever/mycyclopedia",
-       'authorName': "The Author",
-       'siteTitle': "Mycyclopedia",
-       'startingYear': 2009,
-       'defaultPage': 'Start'
-}
