@@ -6,7 +6,7 @@ setup(
     author_email = "ilzogoiby@gmail.com",
     description = "A personal publishing system, based on markdown and web.py",
     version = "0.1",
-    install_requires = ['markdown2', 'web.py', 'pycountry'],
+    install_requires = ['markdown2', 'flask', 'babel'],
     packages = find_packages(),
     package_data = {
     '': ['*.html']

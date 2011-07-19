@@ -1,10 +1,8 @@
-$def with (site_title, base_url, term, definition, metadata, years, author_name)
-
 <!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-<title>$site_title - $term</title>
+<title>{{site_title}} - {{term}}</title>
 <style>
 body {
   font-family: georgia;
@@ -73,32 +71,36 @@ span.warning {
 
 </head>
 <body>
-<h1><a href="$base_url">$site_title</a> <small>$term</small></h1>
+<h1><a href="{{base_url}}">{{site_title}}</a> <small>{{term}}</small></h1>
 <div id="content">
 
 <div style="float:right">
-  $if metadata.get('type',None):
-      <span class="type">$metadata['type']</span>
-  $if metadata.get('language',None):
-      <span class="language">$metadata['language'].name</span>
+  {% if metadata.get('type',None) %}
+      <span class="type">{{metadata['type']}}</span>
+  {% endif %}
+  {% if metadata.get('language',None) %}
+      <span class="language">{{metadata['language']}}</span>
+  {% endif %}
 </div>
-$if metadata.get('status',None) == 'incomplete':
+{% if metadata.get('status',None) == 'incomplete' %}
     <span class="warning">This text is still unfinished</span>
-
-$:definition
+{% endif %}
+{{defHtml | safe}}
 
 <span class="documentDate">
-$if metadata.get('date',None):
-    $metadata['date'].strftime("%d %b %Y")
+{% if metadata.get('date',None) %}
+    {{metadata['date'].strftime("%d %b %Y")}}
+{% endif %}
 </span>
 
 </div>
 <div id="footer">
-  $author_name
-  $if metadata.get('date',None):
-      $metadata['date'].strftime("%Y")
-  $else:
-      $', '.join(years)
+  {{author_name}}
+  {% if metadata.get('date',None) %}
+      {{metadata['date'].strftime("%Y")}}
+  {% else %}
+      {{', '.join(years)}}
+  {% endif %}
 </div>
 </body>
 </html>

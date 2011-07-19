@@ -1,21 +1,10 @@
 #!/usr/bin/env python
 
-CONFIG_FILE = "config.py"
+"""
+Run script - suitable for both standalone WSGI server, or inclusion from others.
+"""
 
-import exsequiae
-
-class configClass(object):
-    pass
-
-execfile(CONFIG_FILE)
-
-configObj = configClass()
-
-for k,v in locals()['config'].iteritems():
-    setattr(configObj, k, v)
-
-app = exsequiae.getApp(configObj)
-application = app.wsgifunc()
+from exsequiae import app
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

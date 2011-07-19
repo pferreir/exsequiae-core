@@ -1,79 +1,75 @@
-import markdown2, re, pycountry
-import web, os, datetime
+import markdown2, re
+import os, datetime
+from babel import Locale
 
+from flask import Flask, render_template, url_for, redirect
 
-def definition_meta(config):
-    linkPatterns = [
-        (re.compile(r"\[([\w]*)\]", re.I), config.baseURL + r"/\1/")
+LINK_PATTERNS = [
+        (re.compile(r"\[([\w]*)\]", re.I), r"/\1/")
         ]
 
+app = Flask(__name__)
+app.config.from_object('exsequiae.default_config')
 
-    class definition:
+def _buildMetadata(defs):
 
-        def _buildMetadata(self, defs):
+    metadata = {}
 
-            metadata = {}
+    for d in defs:
+        name = d.group(1)
+        values = map(lambda x:x.strip(), d.group(2).split(','))
+        if len(values) == 1:
+            values = values[0]
 
-            for d in defs:
-                name = d.group(1)
-                values = map(lambda x:x.strip(), d.group(2).split(','))
-                if len(values) == 1:
-                    values = values[0]
+        if name == 'date':
+            metadata[name] = datetime.datetime.strptime(values, '%Y-%m-%d')
+        elif name == 'language':
+            metadata[name] = Locale.parse(values).display_name
+        else:
+            metadata[name] = values
 
-                if name == 'date':
-                    metadata[name] = datetime.datetime.strptime(values, '%Y-%m-%d')
-                elif name == 'language':
-                    metadata[name] = pycountry.languages.get(alpha2=values)
-                else:
-                    metadata[name] = values
-
-            return metadata
-
-        def _readMetadata(self, text):
-            regexp = re.compile(r'^-\*- (\w+): ((?:[ \w\-]+)(?:,(?:[ \w\-]+))*)\s*$', re.MULTILINE)
-
-            defs = list(regexp.finditer(text))
-
-            if len(defs) > 0:
-                # cut text till the end of last match
-                text = text[defs[-1].end():]
-
-            metadata = self._buildMetadata(defs)
-
-            return metadata, text
-
-        def render(self, term):
-            fileName = os.path.join(config.dictDir, "%s.text" % term)
-
-            if os.path.exists(fileName):
-                f = open(fileName, 'r')
-                metadata, wiki = self._readMetadata(f.read())
-            
-                defHtml = markdown2.markdown(wiki,
-                                             extras=["link-patterns"],
-                                             link_patterns=linkPatterns)
-
-                tpl = web.template.render(os.path.dirname(__file__))
-
-                return tpl.page(config.siteTitle, config.baseURL, term, defHtml, metadata, map(lambda x: str(x), range(config.startingYear, datetime.datetime.now().year+1)), config.authorName)
-            else:
-                return web.webapi.NotFound()
-    
-        def GET(self, term):
-            if not term: 
-                term = config.defaultPage
-            
-            return self.render(term)
-        
-    return definition
+    return metadata
 
 
-def getApp(config):
-    urls = (
-    '(?:/(\w*))?/?', definition_meta(config)
-    )
+def _readMetadata(text):
+    regexp = re.compile(r'^-\*- (\w+): ((?:[ \w\-]+)(?:,(?:[ \w\-]+))*)\s*$', re.MULTILINE)
 
-    app = web.application(urls, globals())
-    return app
+    defs = list(regexp.finditer(text))
+
+    if len(defs) > 0:
+        # cut text till the end of last match
+        text = text[defs[-1].end():]
+
+    metadata = _buildMetadata(defs)
+
+    return metadata, text
 
 
+def render(dterm):
+    config = app.config
+    fileName = os.path.join(config['DICTIONARY_DIR'], "%s.text" % dterm)
+
+    if os.path.exists(fileName):
+        with open(fileName, 'r') as f:
+            metadata, wiki = _readMetadata(f.read())
+
+        defHtml = markdown2.markdown(wiki,
+                                     extras=["link-patterns"],
+                                     link_patterns=LINK_PATTERNS)
+
+        tpl = render_template('page.html', site_title=config['SITE_TITLE'],
+                              base_url=url_for('term_definition', term=''),
+                              term=dterm, defHtml=defHtml, metadata=metadata,
+                              years=map(lambda x: str(x), range(config['STARTING_YEAR'], datetime.datetime.now().year+1)),
+                              author_name=config['AUTHOR_NAME'])
+        return tpl
+    else:
+        return '', 404
+
+@app.route('/<term>/', methods=['GET'])
+def term_definition(term):
+    return render(term)
+
+@app.route('/', methods=['GET'])
+def index():
+    return redirect(url_for('term_definition', term=app.config['DEFAULT_PAGE']))
