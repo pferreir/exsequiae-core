@@ -1,0 +1,133 @@
+body {
+  font-family: georgia;
+  margin: 0;
+  background-color: #D3C19A;
+}
+
+h1 {
+  margin: 0;
+  font-weight: normal;
+  font-size: 30pt;
+  padding: 10px;
+  background-color: #D3C19A;
+  color: #444;
+  border-bottom: 1 px solid #715F3A;
+}
+
+h1 small {
+  color: #666;
+  font-size: 16pt;
+}
+
+h1 a {
+  color: #444;
+  text-decoration: none;
+}
+
+div#content {
+              padding: 10px;
+              min-height: 400px;
+              background: white;
+}
+
+div#footer {
+  padding: 10px;
+  color: #555;
+  text-align: right;
+  background-color: #D3C19A;
+  border-top: 1px solid #715F3A;
+}
+
+span.language {
+  display: block;
+  color: #999;
+}
+
+span.type {
+  display: block;
+  color: #666;
+  font-style: italic;
+}
+
+span.documentDate {
+  display: block;
+  text-align: right;
+  color: #AAA;
+  font-style: italic;
+}
+
+span.warning {
+  color: #AA5C4B;
+  font-style: italic;
+}
+
+.markedit {
+                         height: 100%;
+                         margin-right:  10px;
+                        }
+
+.markedit textarea {
+                        }
+
+div#page { 
+           width: 100%;
+}
+
+div#page.inedit { 
+           float:left;
+}
+
+div#editor { 
+             background: #eee;
+             position: fixed;
+             right: -32%;
+             width: 32%;
+             display: none;
+             float: right;
+             padding: 10px;
+             box-shadow: -1px 1px 2px #bbb;
+}
+
+div#wrapper { 
+              width: 100%;
+              }
+
+div#markedit_buttons { 
+                       width: 120px;
+                       margin: auto;
+                       }
+
+a#edit_toggle { 
+                background: #eee;
+                width: 15px;
+                height: 30px;
+                top: 0px;
+                right: 0px;
+                position: absolute;
+                box-shadow: -1px 1px 2px #bbb;
+                border-radius: 5px 0px 0px 5px;
+                text-decoration: none;
+                font-weight: bold;
+                color: #999;
+                padding: 10px 1px 1px 5px;
+}
+
+a#edit_toggle.expanded { 
+                left: -20px;
+                         }
+
+div#metadata { 
+               float: right;
+               padding: 5px;
+}
+
+div.saved { 
+            position: fixed;
+            left: 0px;
+            bottom: 0px;
+            background: #31BF0A;
+            color: #FFF;
+            border-radius: 5px;
+            padding: 5px;
+            margin: 5px;
+            }

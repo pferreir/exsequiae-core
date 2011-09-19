@@ -3,78 +3,31 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
 <title>{{site_title}} - {{term}}</title>
-<style>
-body {
-  font-family: georgia;
-  margin: 0;
-  background-color: #D3C19A;
-}
 
-h1 {
-  margin: 0;
-  font-weight: normal;
-  font-size: 30pt;
-  padding: 10px;
-  background-color: #D3C19A;
-  color: #444;
-  border-bottom: 1 px solid #715F3A;
-}
+<script type="text/javascript" src="{{url_for('static', filename='jquery.min.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static', filename='showdown.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static', filename='jquery.markedit.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static', filename='jquery-ui.min.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static', filename='exsequiae.js')}}"></script>
 
-h1 small {
-  color: #666;
-  font-size: 16pt;
-}
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='jquery.markedit.css')}}">
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='exsequiae.css')}}">
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='smoothness/jquery-ui.css')}}" />
 
-h1 a {
-  color: #444;
-  text-decoration: none;
-}
+<script type="text/javascript">
 
-div#content {
-  padding: 10px;
-  min-height: 400px;
-  background: white;
-}
+var logged_in = {{'true' if 'username' in session else 'false'}};
 
-div#footer {
-  padding: 10px;
-  color: #555;
-  text-align: right;
-  background-color: #D3C19A;
-  border-top: 1px solid #715F3A;
-}
-
-span.language {
-  display: block;
-  color: #999;
-}
-
-span.type {
-  display: block;
-  color: #666;
-  font-style: italic;
-}
-
-span.documentDate {
-  display: block;
-  text-align: right;
-  color: #AAA;
-  font-style: italic;
-}
-
-span.warning {
-  color: #AA5C4B;
-  font-style: italic;
-}
-
-</style>
-
+$(function() {
+    $('#content').data('term', {{term|tojson|safe}});
+});
+</script>
 </head>
 <body>
-<h1><a href="{{base_url}}">{{site_title}}</a> <small>{{term}}</small></h1>
-<div id="content">
-
-<div style="float:right">
+<div id="page">
+  <h1><a href="{{url_for('index')}}">{{site_title}}</a> <small>{{term}}</small></h1>
+{% block content %}
+<div id="metadata">
   {% if metadata.get('type',None) %}
       <span class="type">{{metadata['type']}}</span>
   {% endif %}
@@ -82,14 +35,17 @@ span.warning {
       <span class="language">{{metadata['language']}}</span>
   {% endif %}
 </div>
+
+<div id="content">
 {% if metadata.get('status',None) == 'incomplete' %}
     <span class="warning">This text is still unfinished</span>
 {% endif %}
+
 {{defHtml | safe}}
 
 <span class="documentDate">
 {% if metadata.get('date',None) %}
-    {{metadata['date'].strftime("%d %b %Y")}}
+    {{metadata['date'] | d}}
 {% endif %}
 </span>
 
@@ -101,6 +57,9 @@ span.warning {
   {% else %}
       {{', '.join(years)}}
   {% endif %}
+
+</div>
+{% endblock %}
 </div>
 </body>
 </html>
