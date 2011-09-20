@@ -2,7 +2,7 @@
 {% block content %}
 <div id="content">
   {{ error if error else '' }}
-<form method="POST" action="{{url_for('login')}}">
+<form method="POST" action="{{url_for('auth.login')}}">
   <input type="text" name="username" />
   <input type="password" name="password" />
   <input type="submit" vaue="submit"/>
