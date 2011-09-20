@@ -2,30 +2,29 @@ from exsequiae.storage import Storage, JSONStorage, DocNode
 
 try:
     __import__('couchdb')
+    COUCHDB_PRESENT = True
 except ImportError:
-    raise Exception("Please install python-couchdb")
+    COUCHDB_PRESENT = False
+
 
 from couchdb.client import Server, DEFAULT_BASE_URL
 from couchdb.mapping import DateTimeField
 
 
 class CouchNode(DocNode):
-
-    def _load_not_cached(self):
-        tree = self._storage._get(self._name)
-        return tree
+    pass
 
 
-@Storage.register('couch')
+@Storage.register('couch', COUCHDB_PRESENT)
 class CouchStorage(JSONStorage):
 
     _node_class = CouchNode
 
-    def __init__(self, db, url=DEFAULT_BASE_URL, initialize=False):
+    def __init__(self, db, url=DEFAULT_BASE_URL, initialize=False, **kwargs):
         self._url = url
         self._server = Server(url)
         self.unique_id = "%s_%s" % (self._url, db)
-        super(CouchStorage, self).__init__()
+        super(CouchStorage, self).__init__(**kwargs)
 
         if db not in self._server:
             if initialize:
@@ -36,7 +35,8 @@ class CouchStorage(JSONStorage):
 
     def __iter__(self):
         for row in self._db.view('_all_docs'):
-            yield row.id, row
+            node = self.new(row.id)
+            yield row.id, self.load(row.id)
 
     def __contains__(self, key):
         return key in self._db
@@ -47,6 +47,10 @@ class CouchStorage(JSONStorage):
     def _get(self, key):
         return self._db[key]
 
-    def _save(self, node, obj, before_close=lambda: 0):
+    def _save(self, node, obj, before_commit=lambda: 0):
         self[node._name] = obj
-        before_close()
+        before_commit()
+
+    def _load_not_cached(self, node):
+        tree = self._get(node._name)
+        return tree

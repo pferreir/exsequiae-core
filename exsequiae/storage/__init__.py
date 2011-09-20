@@ -1,13 +1,13 @@
 """
 Storage module
 
-Future improvements could include some sort of MVCC
+TODO:
+ * basic versioning
+ * some sort of MVCC (?)
 """
 
 import datetime
-from werkzeug.contrib.cache import SimpleCache
-
-cache = SimpleCache()
+from werkzeug.contrib import cache as werk_cache
 
 
 class CacheWrapper(object):
@@ -17,13 +17,18 @@ class CacheWrapper(object):
         self._cache = cache
 
     def get(self, key):
-        return cache.get("%s_%s" % (self._storage.unique_id, key))
+        return self._cache.get("%s_%s" % (self._storage.unique_id, key))
 
     def set(self, key, value):
-        return cache.set("%s_%s" % (self._storage.unique_id, key), value)
+        return self._cache.set("%s_%s" % (self._storage.unique_id, key), value)
 
     def delete(self, key):
-        return cache.delete("%s_%s" % (self._storage.unique_id, key))
+        return self._cache.delete("%s_%s" % (self._storage.unique_id, key))
+
+    @classmethod
+    def initialize(cls, storage, ctype, params):
+        cache = getattr(werk_cache, ctype)(**params)
+        return cls(storage, cache)
 
 
 class CacheException(Exception):
@@ -34,8 +39,8 @@ class Storage(object):
 
     _registered = {}
 
-    def __init__(self):
-        self.cache = CacheWrapper(self, cache)
+    def __init__(self, cache_type='SimpleCache', cache_params=None):
+        self.cache = CacheWrapper.initialize(self, cache_type, cache_params or {})
 
     @classmethod
     def replicate(cls, other_storage, **params):
@@ -47,9 +52,10 @@ class Storage(object):
             new_doc.save()
 
     @staticmethod
-    def register(ident):
+    def register(ident, active=True):
         def _wrapper(sclass):
-            Storage._registered[ident] = sclass
+            if active:
+                Storage._registered[ident] = sclass
             return sclass
         return _wrapper
 
@@ -59,7 +65,9 @@ class Storage(object):
         if stype not in cls._registered:
             raise Exception("Storage type '%s' not available" % stype)
         else:
-            return cls._registered[stype](**sparams)
+            return cls._registered[stype](cache_type=config.get('CACHE_TYPE', 'SimpleCache'),
+                                          cache_params=config.get('CACHE_PARAMS', {}),
+                                          **sparams)
 
     def new(self, name):
         node = self._node_class(self, name)
@@ -81,12 +89,7 @@ class Storage(object):
                 tree = self._load_not_cached(node)
                 self.cache.set(name, tree)
 
-        tree = self._unserialize(tree)
-
-        node.metadata = tree['metadata']
-        node.data = tree['data']
-        node.tree = tree
-        return node
+        return self._dict_to_node(self._unserialize(tree), node)
 
     def save(self, node, before_commit=lambda: 0):
         obj = node.tree
@@ -146,6 +149,12 @@ class JSONStorage(Storage):
             if key == 'date':
                 md[key] = datetime.datetime.strftime(val, "%Y-%m-%d")
         return entry
+
+    def _dict_to_node(self, tree, node):
+        node.metadata = tree['metadata']
+        node.data = tree['data']
+        node.tree = tree
+        return node
 
 
 from exsequiae.storage import file, couch

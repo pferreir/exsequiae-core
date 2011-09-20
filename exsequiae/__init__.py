@@ -1,8 +1,9 @@
 from flask import Flask
 from flaskext.babel import Babel, format_datetime, format_date
-from storage import Storage
+from storage import Storage, CacheWrapper
 
 from application import auth, defs
+
 
 def create_app(instance_path):
     app = Flask(__name__, instance_relative_config=True, instance_path=instance_path)

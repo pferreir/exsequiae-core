@@ -13,13 +13,13 @@ class FileDocNode(DocNode):
 class DirStorage(JSONStorage):
     _node_class = FileDocNode
 
-    def __init__(self, path):
+    def __init__(self, path, **kwargs):
         self._path = path
         self._index = {}
         self._build_index()
         self.unique_id = self._path.replace('/', '_')
         self._w_lock = threading.Lock()
-        super(DirStorage, self).__init__()
+        super(DirStorage, self).__init__(**kwargs)
 
     def _load_not_cached(self, node):
         # acquire and release immediately, just making sure any ongoing operations
