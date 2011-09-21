@@ -1,6 +1,6 @@
 import threading
 
-from exsequiae.storage import CacheException
+from exsequiae.storage import CacheException, NodeNotFoundError
 from datetime import datetime
 
 
@@ -32,6 +32,15 @@ class TestBasicOperationsMixin(object):
         doc1.data = 'lorem ipsum bla bla'
         doc1.save()
         doc1_copy = self.storage.get('doc1', bypass_cache=True)
+
+    def testDelete(self):
+        self.load(STORAGE_DATA_SIMPLE)
+        del self.storage['doc1']
+        self.assertRaises(NodeNotFoundError, self.storage.get, 'doc1')
+
+    def testRetrieveNonExisting(self):
+        self.load(STORAGE_DATA_SIMPLE)
+        self.assertRaises(NodeNotFoundError, self.storage.get, 'doc3')
 
     def testConcurrentSaves(self):
         """

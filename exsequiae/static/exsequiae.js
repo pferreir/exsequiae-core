@@ -55,22 +55,26 @@ function showEditor(term) {
     $('#page').replaceWith($('<div id="wrapper"/>'))
 
     $('#wrapper').append($('<div id="editor"/>')).append(old_page)
-    $('#editor').html('<textarea id="edit_textarea"/>');
+    $('#editor').html('<div id="op_buttons"/><textarea id="edit_textarea"/>');
 
     $('#editor').append($('#edit_toggle').addClass('expanded').html('↪'));
     $('#page').addClass('inedit')
     $('#page').animate({width: '67%'}, 500);
+
+    $('#op_buttons').append($('<button id="delete_button">Delete</button>').click(
+        function(){
+            delete_term(term);
+        }));
 
     $('#editor').show();
     $('#edit_textarea').markedit(
         {
             preview: false,
             postload: function() {
-                $('#edit_textarea').markeditBindAutoPreview($('#content')); 
+                $('#edit_textarea').markeditBindAutoPreview($('#content'));
                 loadContents(term);
             }
         });
-
 
     $('.markedit').append($('<div id="markedit_buttons"/>'));
 
@@ -90,7 +94,7 @@ function showEditor(term) {
             var text = state.beforeSelect + state.select + state.afterSelect;
             button.attr("disabled", true)
             $.ajax({'type': 'POST',
-                    'url': '../' + term + '.json/',
+                    'url': '../' + term + '/',
                     'data': {content: text},
                     success: function(text) {
                         oldContents = $('#content').html();
@@ -99,11 +103,28 @@ function showEditor(term) {
                         $(document.body).append(saved);
                         saved.fadeIn(100).delay(2000).fadeOut();
                     }});
-            
         });
 
     $('#cancel_button').click(
         function() {
             $('#edit_toggle').trigger('toggleState');
         });
+}
+
+function create_term(term) {
+    $.ajax({url: '../' + term + '/',
+            type: 'PUT',
+            success: function(text) {
+                window.location.reload();
+            }});
+}
+
+function delete_term(term) {
+    if (confirm('Are you sure you want to delete this term?')) {
+        $.ajax({url: '../' + term + '/',
+                type: 'DELETE',
+                success: function(text) {
+                    window.location.reload();
+                }});
+    }
 }

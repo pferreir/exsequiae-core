@@ -23,7 +23,7 @@ SECRET_KEY = 'a VERY random sequence'
 STORAGE_TYPE = 'couch'
 STORAGE_PARAMS = {'db': 'exsequiae_tests'}
 CACHE_TYPE = 'MemcachedCache'
-CACHE_PARAMS = {'servers': ['127.0.0.1']}
+CACHE_PARAMS = {'servers': ['127.0.0.1:11211']}
 ```
 
 # Executing test server

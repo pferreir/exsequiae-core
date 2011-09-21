@@ -1,4 +1,4 @@
-from exsequiae.storage import Storage, JSONStorage, DocNode
+from exsequiae.storage import Storage, JSONStorage, DocNode, NodeNotFoundError
 
 try:
     __import__('couchdb')
@@ -44,8 +44,11 @@ class CouchStorage(JSONStorage):
     def __setitem__(self, key, value):
         self._db[key] = value
 
+    def _delete(self, key):
+        del self._db[key]
+
     def _get(self, key):
-        return self._db[key]
+        return self._db.get(key, None)
 
     def _save(self, node, obj, before_commit=lambda: 0):
         self[node._name] = obj
@@ -53,4 +56,7 @@ class CouchStorage(JSONStorage):
 
     def _load_not_cached(self, node):
         tree = self._get(node._name)
-        return tree
+        if tree == None:
+            raise NodeNotFoundError()
+        else:
+            return tree

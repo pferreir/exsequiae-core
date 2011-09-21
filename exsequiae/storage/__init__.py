@@ -35,6 +35,10 @@ class CacheException(Exception):
     pass
 
 
+class NodeNotFoundError(Exception):
+    pass
+
+
 class Storage(object):
 
     _registered = {}
@@ -91,6 +95,10 @@ class Storage(object):
 
         return self._dict_to_node(self._unserialize(tree), node)
 
+    def delete(self, name):
+        self.cache.delete(name)
+        self._delete(name)
+
     def save(self, node, before_commit=lambda: 0):
         obj = node.tree
         obj.update(self._serialize({'metadata': node.metadata, 'data': node.data}))
@@ -101,6 +109,9 @@ class Storage(object):
 
     def __getitem__(self, key):
         return self.load(key)
+
+    def __delitem__(self, key):
+        self.delete(key)
 
     def get(self, key, fail_on_miss=False, bypass_cache=False):
         return self.load(key, fail_on_miss=fail_on_miss, bypass_cache=bypass_cache)

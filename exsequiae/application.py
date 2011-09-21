@@ -4,15 +4,23 @@ from babel import Locale
 
 from flask import render_template, url_for, redirect, request, session, jsonify, current_app, Blueprint
 
+
 LINK_PATTERNS = [
         (re.compile(r"\[([\w]*)\]", re.I), r"/\1/")
         ]
 
+
 auth = Blueprint('auth', __name__)
 defs = Blueprint('defs', __name__)
 
+
 class NoSuchTermException(Exception):
     pass
+
+
+class TermAlreadyExistsException(Exception):
+    pass
+
 
 def read_term(term):
     if term in current_app.storage:
@@ -38,7 +46,9 @@ def render(dterm):
                               author_name=config['AUTHOR_NAME'])
         return tpl
     except NoSuchTermException:
-        return '', 404
+        return render_template('not_found.html', site_title=config['SITE_TITLE'], term=dterm), 404
+
+
 
 
 @auth.route('/login/', methods=['GET', 'POST'])
@@ -54,23 +64,40 @@ def login():
         return render_template('login.html', site_title=current_app.config['SITE_TITLE'], term="login")
 
 
-@defs.route('/<term>/', methods=['GET'])
+@defs.route('/<term>/', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def term_definition(term):
-    return render(term)
-
-
-@defs.route('/<term>.json/', methods=['GET', 'POST'])
-def term_definition_json(term):
     if request.method == 'GET':
-        return read_term(term)[1]
-    else:
-        if 'username' in session:
-            node = current_app.storage[term]
-            node.data = request.form['content']
-            node.save()
-            return jsonify({'result': 'ok'})
+        return render(term)
+
+    # Otherwise, user has to be logged in
+    if 'username' not in session:
+        return jsonify({'error': 'You are not logged in!'}), 403
+
+    if request.method == 'PUT':
+        if term in current_app.storage:
+            raise TermAlreadyExistsException()
         else:
-            return jsonify({'error': 'You are not logged in!'}), 403
+            node = current_app.storage.new(term)
+            node.metadata = {}
+            node.data = ''
+            node.save()
+            return ''
+    elif request.method == 'DELETE':
+        if term in current_app.storage:
+            del current_app.storage[term]
+            return ''
+        else:
+            raise NoSuchTermException()
+    elif request.method == 'POST':
+        node = current_app.storage[term]
+        node.data = request.form['content']
+        node.save()
+        return ''
+
+
+@defs.route('/<term>.json/', methods=['GET'])
+def term_definition_json(term):
+    return read_term(term)[1]
 
 
 @defs.route('/', methods=['GET'])

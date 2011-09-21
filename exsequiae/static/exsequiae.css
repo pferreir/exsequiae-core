@@ -69,15 +69,15 @@ span.warning {
 .markedit textarea {
                         }
 
-div#page { 
+div#page {
            width: 100%;
 }
 
-div#page.inedit { 
+div#page.inedit {
            float:left;
 }
 
-div#editor { 
+div#editor {
              background: #eee;
              position: fixed;
              right: -32%;
@@ -88,16 +88,16 @@ div#editor {
              box-shadow: -1px 1px 2px #bbb;
 }
 
-div#wrapper { 
+div#wrapper {
               width: 100%;
               }
 
-div#markedit_buttons { 
+div#markedit_buttons {
                        width: 120px;
                        margin: auto;
                        }
 
-a#edit_toggle { 
+a#edit_toggle {
                 background: #eee;
                 width: 15px;
                 height: 30px;
@@ -112,16 +112,16 @@ a#edit_toggle {
                 padding: 10px 1px 1px 5px;
 }
 
-a#edit_toggle.expanded { 
+a#edit_toggle.expanded {
                 left: -20px;
                          }
 
-div#metadata { 
+div#metadata {
                float: right;
                padding: 5px;
 }
 
-div.saved { 
+div.saved {
             position: fixed;
             left: 0px;
             bottom: 0px;
@@ -131,3 +131,11 @@ div.saved {
             padding: 5px;
             margin: 5px;
             }
+
+div#op_buttons {
+                 text-align: right;
+                 background: #bbb;
+                 padding: 5px;
+                 margin-bottom: 5px;
+                 border-radius: 5px;
+}

@@ -1,5 +1,5 @@
 import os, json, datetime, threading
-from exsequiae.storage import Storage, JSONStorage, DocNode
+from exsequiae.storage import Storage, JSONStorage, DocNode, NodeNotFoundError
 
 
 class FileDocNode(DocNode):
@@ -24,6 +24,8 @@ class DirStorage(JSONStorage):
     def _load_not_cached(self, node):
         # acquire and release immediately, just making sure any ongoing operations
         # finish first
+        if node._name not in self._index:
+            raise NodeNotFoundError()
         with self._w_lock:
             pass
         with open(node._fpath, 'r') as f:
@@ -37,7 +39,7 @@ class DirStorage(JSONStorage):
             if os.path.isfile(fpath):
                 base, ext = os.path.splitext(fname)
                 if ext == ".json":
-                    self._index[base] = FileDocNode(self, fname)
+                    self._index[base] = FileDocNode(self, base)
 
     @property
     def path(self):
@@ -49,6 +51,10 @@ class DirStorage(JSONStorage):
 
     def __contains__(self, key):
         return key in self._index
+
+    def _delete(self, key):
+        os.remove(self._index[key]._fpath)
+        del self._index[key]
 
     def _save(self, node, obj, before_commit=lambda: 0):
         self._w_lock.acquire()
