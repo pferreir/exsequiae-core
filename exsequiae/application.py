@@ -2,7 +2,7 @@ import markdown2, re
 import os, datetime
 from babel import Locale
 
-from flask import render_template, url_for, redirect, request, session, jsonify, current_app, Blueprint
+from flask import render_template, url_for, redirect, request, session, jsonify, current_app, Blueprint, json
 
 
 LINK_PATTERNS = [
@@ -39,15 +39,13 @@ def render(dterm):
                                      extras=["link-patterns"],
                                      link_patterns=LINK_PATTERNS)
 
-        tpl = render_template('page.html', site_title=config['SITE_TITLE'],
+        tpl = render_template('definition.html', site_title=config['SITE_TITLE'],
                               term=dterm, defHtml=defHtml, metadata=metadata,
                               years=map(lambda x: str(x), range(config['STARTING_YEAR'], datetime.datetime.now().year+1)),
                               author_name=config['AUTHOR_NAME'])
         return tpl
     except NoSuchTermException:
         return render_template('not_found.html', site_title=config['SITE_TITLE'], term=dterm), 404
-
-
 
 
 @auth.route('/login/', methods=['GET', 'POST'])
@@ -63,6 +61,15 @@ def login():
         return render_template('login.html', site_title=current_app.config['SITE_TITLE'], term="login")
 
 
+@auth.route('/logout/', methods=['GET', 'POST'])
+def logout():
+    if request.method == 'GET':
+        return render_template('logout.html', site_title=current_app.config['SITE_TITLE'], term="logout")
+    elif request.method == 'POST':
+        del session['username']
+        return redirect(url_for('defs.index'))
+
+
 @defs.route('/<term>/', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def term_definition(term):
     if request.method == 'GET':
@@ -70,7 +77,7 @@ def term_definition(term):
 
     # Otherwise, user has to be logged in
     if 'username' not in session:
-        return jsonify({'error': 'You are not logged in!'}), 403
+        return json.dumps({'error': 'You are not logged in!'}), 403
 
     if request.method == 'PUT':
         if term in current_app.storage:
@@ -97,13 +104,18 @@ def term_definition(term):
 @defs.route('/<term>/res/', methods=['GET', 'POST'])
 def resource_list(term):
     if request.method == 'POST':
-        node = current_app.storage[term]
-        f = request.files['file']
-        node.add_attachment(f.filename, f, f.mimetype)
-        return ''
+        # User has to be logged in
+        if 'username' not in session:
+            return json.dumps({'error': 'You are not logged in!'}), 403
+        else:
+            node = current_app.storage[term]
+            f = request.files['file']
+            node.add_attachment(f.filename, f, f.mimetype)
+            return ''
     else:
         return render_template('resource_list.html', site_title=current_app.config['SITE_TITLE'],
                                term=term, storage_node=current_app.storage[term])
+
 
 @defs.route('/<term>/res/<resource>', methods=['GET'])
 def resource(term, resource):

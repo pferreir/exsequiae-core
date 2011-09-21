@@ -17,8 +17,10 @@ filename='resources.js')}}"></script>
         <li>{{resource.name}}</li>
     {% endfor %}
   </ul>
+  {% if 'username' in session %}
   <div id="uploader">
     Javascript is off?
   </div>
+  {% endif %}
 </div>
 {% endblock %}
