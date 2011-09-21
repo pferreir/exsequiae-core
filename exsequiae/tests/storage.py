@@ -138,15 +138,21 @@ class TestAttachmentsMixin(object):
     def testAttachmentAdd(self):
         self.load(STORAGE_DATA_SIMPLE)
         doc1 = self.storage.get('doc1')
+        doc1.add_attachment('att1', 'i shall taunt you one more time')
+        self.assertEqual(doc1.get_attachment('att1', bypass_cache=True).data, 'i shall taunt you one more time')
+
+    def testAttachmentAddStream(self):
+        self.load(STORAGE_DATA_SIMPLE)
+        doc1 = self.storage.get('doc1')
         doc1.add_attachment('att1', StringIO.StringIO('i shall taunt you one more time'))
-        self.assertEqual(doc1.get_attachment('att1', bypass_cache=True).data.read(), 'i shall taunt you one more time')
+        self.assertEqual(doc1.get_attachment('att1', bypass_cache=True).data, 'i shall taunt you one more time')
 
     def testAttachmentRetrieval(self):
         self.load(STORAGE_DATA_SIMPLE)
         doc2 = self.storage.get('doc2')
         self.assertRaises(ResourceNotFoundError, doc2.get_attachment, 'att1')
-        doc2.add_attachment('att1', StringIO.StringIO('i shall taunt you one more time'))
-        self.assertEqual(len(doc2.get_attachment('att1').data.read()), 31)
+        doc2.add_attachment('att1', 'i shall taunt you one more time')
+        self.assertEqual(len(doc2.get_attachment('att1').data), 31)
 
     def testAttachmentIteration(self):
         self.load(STORAGE_DATA_SIMPLE)
@@ -158,22 +164,22 @@ class TestAttachmentsMixin(object):
             }
 
         for k, v in taunts.iteritems():
-            doc2.add_attachment(k, StringIO.StringIO(v))
+            doc2.add_attachment(k, v)
 
         for att in doc2:
-            self.assertEqual(att.data.read(), taunts[att.name])
+            self.assertEqual(att.data, taunts[att.name])
 
     def testAttachmentCaching(self):
         self.load(STORAGE_DATA_SIMPLE)
         doc1 = self.storage.get('doc1')
 
         # on add, caching is done
-        doc1.add_attachment('att1', StringIO.StringIO('i shall taunt you one more time'))
-        self.assertEqual(doc1.get_attachment('att1').data.read(), 'i shall taunt you one more time')
+        doc1.add_attachment('att1', 'i shall taunt you one more time')
+        self.assertEqual(doc1.get_attachment('att1').data, 'i shall taunt you one more time')
         # now let's clear everything and test caching on read
         self.storage.cache.clear()
 
         # first load
-        self.assertEqual(doc1.get_attachment('att1').data.read(), 'i shall taunt you one more time')
+        self.assertEqual(doc1.get_attachment('att1').data, 'i shall taunt you one more time')
         # now this one can't fail
-        self.assertEqual(doc1.get_attachment('att1', fail_on_miss=True).data.read(), 'i shall taunt you one more time')
+        self.assertEqual(doc1.get_attachment('att1', fail_on_miss=True).data, 'i shall taunt you one more time')

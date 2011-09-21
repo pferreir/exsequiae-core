@@ -1,4 +1,3 @@
-import StringIO
 from exsequiae.storage import Storage, JSONStorage, DocNode, NodeNotFoundError, Resource, ResourceNotFoundError
 
 try:
@@ -68,15 +67,14 @@ class CouchStorage(JSONStorage):
             atts = node.tree['_attachments']
             if att_name in atts:
                 att = atts[att_name]
-                return Resource(att_name, StringIO.StringIO(self._db.get_attachment(node_name, att_name).read()),
+                return Resource(att_name, self._db.get_attachment(node_name, att_name).read(),
                                 att['length'], att['content_type'])
         raise ResourceNotFoundError(att_name)
 
-    def _add_attachment(self, node_name, att_name, fcontent, mime=None):
+    def _add_attachment(self, node_name, att_name, data, mime=None):
         self.cache.delete(node_name)
-        data = fcontent.read()
         self._db.put_attachment(self._get(node_name), data, att_name, mime)
-        return Resource(att_name, StringIO.StringIO(data),
+        return Resource(att_name, data,
                         len(data), mime)
 
 

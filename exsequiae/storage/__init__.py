@@ -7,7 +7,6 @@ TODO:
 """
 
 import datetime
-import StringIO
 from werkzeug.contrib import cache as werk_cache
 
 
@@ -180,6 +179,8 @@ class DocNode(object):
         return entry
 
     def add_attachment(self, name, content, mime=None):
+        if not isinstance(content, str) and not isinstance(content, unicode):
+            content = content.read()
         entry = self._storage._add_attachment(self._name, name, content, mime)
         self._storage.cache.set("%s_%s" % (self._name, name), entry)
         return entry

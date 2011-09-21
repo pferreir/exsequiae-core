@@ -124,8 +124,7 @@ def resource(term, resource):
     if res == None:
         return 'Not found', 404
     else:
-        data = res.data.read()
-        return data, 200, [], res.mime
+        return res.data, 200, [], res.mime
 
 
 @defs.route('/<term>.json/', methods=['GET'])

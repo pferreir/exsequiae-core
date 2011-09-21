@@ -1,5 +1,4 @@
 import os, json, datetime, threading, base64, shutil
-import StringIO
 from exsequiae.storage import Storage, JSONStorage, DocNode, NodeNotFoundError, ResourceNotFoundError, Resource
 
 
@@ -81,21 +80,19 @@ class DirStorage(JSONStorage):
             with open(att_path, 'r') as f:
                 tree = json.load(f)
 
-        output_buffer = StringIO.StringIO(base64.decodestring(tree['content']))
-        return Resource(att_name, output_buffer, **tree['metadata'])
+        return Resource(att_name, base64.decodestring(tree['content']), **tree['metadata'])
 
     def _add_attachment(self, node_name, att_name, content, mime=None):
         node = self[node_name]
         res_path = "%s_resources" % node._fpath
         if not os.path.exists(res_path):
             os.mkdir(res_path)
-        data = content.read()
-        tree = {'metadata':{ 'length': len(data),
+        tree = {'metadata':{ 'length': len(content),
                              'mime': mime },
-                'content': base64.encodestring(data)}
+                'content': base64.encodestring(content)}
         with open(os.path.join(res_path, att_name), 'w') as f:
             json.dump(tree, f)
-        return Resource(att_name, StringIO.StringIO(data), **tree['metadata'])
+        return Resource(att_name, content, **tree['metadata'])
 
     def _iter_attachments(self, node_name):
         node = self[node_name]
