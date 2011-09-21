@@ -29,7 +29,6 @@ def read_term(term):
     else:
         raise NoSuchTermException(term)
 
-
 def render(dterm):
     config = current_app.config
 
@@ -93,6 +92,28 @@ def term_definition(term):
         node.data = request.form['content']
         node.save()
         return ''
+
+
+@defs.route('/<term>/res/', methods=['GET', 'POST'])
+def resource_list(term):
+    if request.method == 'POST':
+        node = current_app.storage[term]
+        f = request.files['file']
+        node.add_attachment(f.filename, f, f.mimetype)
+        return ''
+    else:
+        return render_template('resource_list.html', site_title=current_app.config['SITE_TITLE'],
+                               term=term, storage_node=current_app.storage[term])
+
+@defs.route('/<term>/res/<resource>', methods=['GET'])
+def resource(term, resource):
+    node = current_app.storage[term]
+    res = node.get_attachment(resource)
+    if res == None:
+        return 'Not found', 404
+    else:
+        data = res.data.read()
+        return data, 200, [], res.mime
 
 
 @defs.route('/<term>.json/', methods=['GET'])

@@ -1,4 +1,5 @@
-from exsequiae.storage import Storage, JSONStorage, DocNode, NodeNotFoundError
+import StringIO
+from exsequiae.storage import Storage, JSONStorage, DocNode, NodeNotFoundError, Resource, ResourceNotFoundError
 
 try:
     __import__('couchdb')
@@ -60,3 +61,27 @@ class CouchStorage(JSONStorage):
             raise NodeNotFoundError()
         else:
             return tree
+
+    def _get_attachment(self, node_name, att_name):
+        node = self[node_name]
+        if '_attachments' in node.tree:
+            atts = node.tree['_attachments']
+            if att_name in atts:
+                att = atts[att_name]
+                return Resource(att_name, StringIO.StringIO(self._db.get_attachment(node_name, att_name).read()),
+                                att['length'], att['content_type'])
+        raise ResourceNotFoundError(att_name)
+
+    def _add_attachment(self, node_name, att_name, fcontent, mime=None):
+        self.cache.delete(node_name)
+        data = fcontent.read()
+        self._db.put_attachment(self._get(node_name), data, att_name, mime)
+        return Resource(att_name, StringIO.StringIO(data),
+                        len(data), mime)
+
+
+    def _iter_attachments(self, node_name):
+        node = self[node_name]
+        if '_attachments' in node.tree:
+            for fname in node.tree['_attachments']:
+                yield node.get_attachment(fname)

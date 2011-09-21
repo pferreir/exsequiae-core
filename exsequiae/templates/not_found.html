@@ -1,0 +1,9 @@
+{% extends 'page.html' %}
+{% block content %}
+<div id="content">
+  This term doesn't exist. Do you want to <a id="term_create" href="#">create a new one</a>?
+</div>
+<script type="text/javascript">
+$('#term_create').click(function(){ create_term({{term|tojson|safe}}); });
+</script>
+{% endblock %}

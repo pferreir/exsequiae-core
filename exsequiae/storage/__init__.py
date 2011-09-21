@@ -7,6 +7,7 @@ TODO:
 """
 
 import datetime
+import StringIO
 from werkzeug.contrib import cache as werk_cache
 
 
@@ -25,6 +26,9 @@ class CacheWrapper(object):
     def delete(self, key):
         return self._cache.delete("%s_%s" % (self._storage.unique_id, key))
 
+    def clear(self):
+        return self._cache.clear()
+
     @classmethod
     def initialize(cls, storage, ctype, params):
         cache = getattr(werk_cache, ctype)(**params)
@@ -37,6 +41,23 @@ class CacheException(Exception):
 
 class NodeNotFoundError(Exception):
     pass
+
+
+class ResourceNotFoundError(Exception):
+    pass
+
+
+class Resource(object):
+
+    def __init__(self, name, data, length, mime):
+        self.name = name
+        self.data = data
+        self.lenght = length
+        self.mime = mime
+
+    @property
+    def metadata(self):
+        return dict((k, getattr(self, k)) for k in ['length', 'mime'])
 
 
 class Storage(object):
@@ -116,6 +137,7 @@ class Storage(object):
     def get(self, key, fail_on_miss=False, bypass_cache=False):
         return self.load(key, fail_on_miss=fail_on_miss, bypass_cache=bypass_cache)
 
+
 class DocNode(object):
 
     def __init__(self, storage, name):
@@ -144,6 +166,26 @@ class DocNode(object):
     def save(self, before_commit=lambda: 0):
         self._storage.save(self, before_commit=before_commit)
 
+    def get_attachment(self, name, bypass_cache=False, fail_on_miss=False):
+        if bypass_cache:
+            entry = self._storage._get_attachment(self._name, name)
+        else:
+            entry = self._storage.cache.get("%s_%s" % (self._name, name))
+            if not entry:
+                if fail_on_miss:
+                    raise CacheException('MISS')
+                # cache miss
+                entry = self._storage._get_attachment(self._name, name)
+                self._storage.cache.set("%s_%s" % (self._name, name), entry)
+        return entry
+
+    def add_attachment(self, name, content, mime=None):
+        entry = self._storage._add_attachment(self._name, name, content, mime)
+        self._storage.cache.set("%s_%s" % (self._name, name), entry)
+        return entry
+
+    def __iter__(self):
+        return self._storage._iter_attachments(self._name)
 
 class JSONStorage(Storage):
 

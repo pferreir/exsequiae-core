@@ -3,12 +3,13 @@ import json
 import tempfile
 import os
 
-from exsequiae.tests.storage import TestBasicOperationsMixin, TestCachingMixin
+from exsequiae.tests.storage import TestBasicOperationsMixin, TestCachingMixin, TestAttachmentsMixin
 from exsequiae.storage.couch import CouchStorage
 
 from couchdb.tests.testutil import TempDatabaseMixin
 
-class TestCouchStorage(TempDatabaseMixin, unittest.TestCase, TestBasicOperationsMixin, TestCachingMixin):
+class TestCouchStorage(TempDatabaseMixin, unittest.TestCase, TestBasicOperationsMixin, TestCachingMixin,
+                       TestAttachmentsMixin):
 
     def load(self, data):
         db_name, self._db = self.temp_db()

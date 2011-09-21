@@ -1,7 +1,8 @@
 import threading
-
-from exsequiae.storage import CacheException, NodeNotFoundError
+import StringIO
 from datetime import datetime
+
+from exsequiae.storage import CacheException, NodeNotFoundError, ResourceNotFoundError
 
 
 STORAGE_DATA_SIMPLE = {'doc1': {'data': 'This is document 1', 'metadata': {}},
@@ -56,7 +57,7 @@ class TestBasicOperationsMixin(object):
                 doc1.save()
             t_cont['t'] = threading.Thread(target=_save)
             t_cont['t'].start()
-            
+
         self.load(STORAGE_DATA_SIMPLE)
         doc1 = self.storage['doc1']
         doc1.data = 'lorem ipsum bla bla'
@@ -77,16 +78,16 @@ class TestBasicOperationsMixin(object):
                 self.assertEqual(doc1_copy.data, 'lorem ipsum bla bla')
             t_cont['t'] = threading.Thread(target=_read)
             t_cont['t'].start()
-            
+
         self.load(STORAGE_DATA_SIMPLE)
         doc1 = self.storage['doc1']
         doc1.data = 'lorem ipsum bla bla'
         doc1.save(before_commit=concurrent_read)
         t_cont['t'].join()
 
-    
+
 class TestCachingMixin(object):
-            
+
     def testCacheHit(self):
         self.load(STORAGE_DATA_SIMPLE)
         # this should place doc1 in the cache
@@ -124,9 +125,55 @@ class TestCachingMixin(object):
                 self.assertEqual(doc1_copy.data, 'lorem ipsum bla bla')
             t_cont['t'] = threading.Thread(target=_read)
             t_cont['t'].start()
-            
+
         self.load(STORAGE_DATA_SIMPLE)
         doc1 = self.storage['doc1']
         doc1.data = 'lorem ipsum bla bla'
         doc1.save(before_commit=concurrent_read)
         t_cont['t'].join()
+
+
+class TestAttachmentsMixin(object):
+
+    def testAttachmentAdd(self):
+        self.load(STORAGE_DATA_SIMPLE)
+        doc1 = self.storage.get('doc1')
+        doc1.add_attachment('att1', StringIO.StringIO('i shall taunt you one more time'))
+        self.assertEqual(doc1.get_attachment('att1', bypass_cache=True).data.read(), 'i shall taunt you one more time')
+
+    def testAttachmentRetrieval(self):
+        self.load(STORAGE_DATA_SIMPLE)
+        doc2 = self.storage.get('doc2')
+        self.assertRaises(ResourceNotFoundError, doc2.get_attachment, 'att1')
+        doc2.add_attachment('att1', StringIO.StringIO('i shall taunt you one more time'))
+        self.assertEqual(len(doc2.get_attachment('att1').data.read()), 31)
+
+    def testAttachmentIteration(self):
+        self.load(STORAGE_DATA_SIMPLE)
+        doc2 = self.storage.get('doc2')
+        taunts = {
+            'att1': 'i shall taunt you one more time',
+            'att2': 'i shall taunt yet another time',
+            'att3': 'i shall taunt you... yet another time'
+            }
+
+        for k, v in taunts.iteritems():
+            doc2.add_attachment(k, StringIO.StringIO(v))
+
+        for att in doc2:
+            self.assertEqual(att.data.read(), taunts[att.name])
+
+    def testAttachmentCaching(self):
+        self.load(STORAGE_DATA_SIMPLE)
+        doc1 = self.storage.get('doc1')
+
+        # on add, caching is done
+        doc1.add_attachment('att1', StringIO.StringIO('i shall taunt you one more time'))
+        self.assertEqual(doc1.get_attachment('att1').data.read(), 'i shall taunt you one more time')
+        # now let's clear everything and test caching on read
+        self.storage.cache.clear()
+
+        # first load
+        self.assertEqual(doc1.get_attachment('att1').data.read(), 'i shall taunt you one more time')
+        # now this one can't fail
+        self.assertEqual(doc1.get_attachment('att1', fail_on_miss=True).data.read(), 'i shall taunt you one more time')

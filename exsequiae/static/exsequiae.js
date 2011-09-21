@@ -20,7 +20,7 @@ $(window).load(function() {
 
 function resizeMarkedit() {
     $('.markedit').height($(window).height());
-    $('.markedit textarea').height($(window).height() - 100);
+    $('.markedit textarea').height($(window).height() - 200);
 }
 
 function hideEditor(term) {

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
 <title>{{site_title}} - {{term}}</title>
-
+{% block includes %}
 <script type="text/javascript" src="{{url_for('static', filename='jquery.min.js')}}"></script>
 <script type="text/javascript" src="{{url_for('static', filename='showdown.js')}}"></script>
 <script type="text/javascript" src="{{url_for('static', filename='jquery.markedit.js')}}"></script>
@@ -22,6 +22,7 @@ $(function() {
     $('#content').data('term', {{term|tojson|safe}});
 });
 </script>
+{% endblock %}
 </head>
 <body>
 <div id="page">

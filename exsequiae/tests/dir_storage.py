@@ -3,11 +3,12 @@ import json
 import tempfile
 import os
 
-from exsequiae.tests.storage import TestBasicOperationsMixin, TestCachingMixin
+from exsequiae.tests.storage import TestBasicOperationsMixin, TestCachingMixin, TestAttachmentsMixin
 from exsequiae.storage.file import DirStorage
 
 
-class TestDirStorage(unittest.TestCase, TestBasicOperationsMixin, TestCachingMixin):
+class TestDirStorage(unittest.TestCase, TestBasicOperationsMixin, TestCachingMixin,
+                     TestAttachmentsMixin):
 
     def load(self, data):
         fs_dir = tempfile.mkdtemp()

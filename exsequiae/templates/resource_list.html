@@ -1,0 +1,24 @@
+{% extends 'page.html' %}
+{% block includes %}
+{{ super() }}
+<script type="text/javascript" src="{{url_for('static',
+filename='plupload.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static', filename='plupload.html5.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static',
+filename='jquery.ui.plupload.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static',
+filename='resources.js')}}"></script>
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='jquery.ui.plupload.css')}}">
+{% endblock %}
+{% block content %}
+<div id="content">
+  <ul>
+    {% for resource in storage_node: %}
+        <li>{{resource.name}}</li>
+    {% endfor %}
+  </ul>
+  <div id="uploader">
+    Javascript is off?
+  </div>
+</div>
+{% endblock %}

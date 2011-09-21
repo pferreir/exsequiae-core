@@ -1,5 +1,6 @@
-import os, json, datetime, threading
-from exsequiae.storage import Storage, JSONStorage, DocNode, NodeNotFoundError
+import os, json, datetime, threading, base64, shutil
+import StringIO
+from exsequiae.storage import Storage, JSONStorage, DocNode, NodeNotFoundError, ResourceNotFoundError, Resource
 
 
 class FileDocNode(DocNode):
@@ -54,6 +55,9 @@ class DirStorage(JSONStorage):
 
     def _delete(self, key):
         os.remove(self._index[key]._fpath)
+        att_path = "%s_resources" % self._index[key]._fpath
+        if os.path.exists(att_path):
+            shutil.rmtree(att_path)
         del self._index[key]
 
     def _save(self, node, obj, before_commit=lambda: 0):
@@ -63,5 +67,41 @@ class DirStorage(JSONStorage):
             before_commit()
             f.flush()
             os.fsync(f.fileno())
-        self._index[node._name] = obj
+        self._index[node._name] = node
         self._w_lock.release()
+
+    def _get_attachment(self, node_name, att_name):
+        node = self[node_name]
+        res_path = "%s_resources" % node._fpath
+        att_path = os.path.join(res_path, att_name)
+
+        if not os.path.exists(att_path):
+            raise ResourceNotFoundError(att_name)
+        else:
+            with open(att_path, 'r') as f:
+                tree = json.load(f)
+
+        output_buffer = StringIO.StringIO(base64.decodestring(tree['content']))
+        return Resource(att_name, output_buffer, **tree['metadata'])
+
+    def _add_attachment(self, node_name, att_name, content, mime=None):
+        node = self[node_name]
+        res_path = "%s_resources" % node._fpath
+        if not os.path.exists(res_path):
+            os.mkdir(res_path)
+        data = content.read()
+        tree = {'metadata':{ 'length': len(data),
+                             'mime': mime },
+                'content': base64.encodestring(data)}
+        with open(os.path.join(res_path, att_name), 'w') as f:
+            json.dump(tree, f)
+        return Resource(att_name, StringIO.StringIO(data), **tree['metadata'])
+
+    def _iter_attachments(self, node_name):
+        node = self[node_name]
+        res_path = "%s_resources" % node._fpath
+        if os.path.exists(res_path):
+            for fname in os.listdir(res_path):
+                rpath = os.path.join(res_path, fname)
+                if os.path.isfile(rpath):
+                    yield node.get_attachment(fname)
