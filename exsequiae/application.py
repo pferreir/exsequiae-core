@@ -117,14 +117,22 @@ def resource_list(term):
                                term=term, storage_node=current_app.storage[term])
 
 
-@defs.route('/<term>/res/<resource>', methods=['GET'])
+@defs.route('/<term>/res/<resource>', methods=['GET', 'DELETE'])
 def resource(term, resource):
     node = current_app.storage[term]
     res = node.get_attachment(resource)
+
     if res == None:
         return 'Not found', 404
-    else:
+
+    if request.method == 'GET':
         return res.data, 200, [], res.mime
+    elif request.method == 'DELETE':
+        if 'username' not in session:
+            return json.dumps({'error': 'You are not logged in!'}), 403
+        else:
+            del node[resource]
+            return ''
 
 
 @defs.route('/<term>.json/', methods=['GET'])

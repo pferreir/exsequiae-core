@@ -154,6 +154,13 @@ class TestAttachmentsMixin(object):
         doc2.add_attachment('att1', 'i shall taunt you one more time')
         self.assertEqual(len(doc2.get_attachment('att1').data), 31)
 
+    def testAttachmentRemoval(self):
+        self.load(STORAGE_DATA_SIMPLE)
+        doc2 = self.storage.get('doc2')
+        doc2.add_attachment('att1', 'i shall taunt you one more time')
+        del doc2['att1']
+        self.assertRaises(ResourceNotFoundError, doc2.get_attachment, 'att1')
+
     def testAttachmentIteration(self):
         self.load(STORAGE_DATA_SIMPLE)
         doc2 = self.storage.get('doc2')

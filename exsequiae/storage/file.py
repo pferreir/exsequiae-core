@@ -80,7 +80,7 @@ class DirStorage(JSONStorage):
             with open(att_path, 'r') as f:
                 tree = json.load(f)
 
-        return Resource(att_name, base64.decodestring(tree['content']), **tree['metadata'])
+        return Resource(att_name, base64.decodestring(tree['content']), tree['metadata']['length'], tree['metadata']['mime'])
 
     def _add_attachment(self, node_name, att_name, content, mime=None):
         node = self[node_name]
@@ -92,7 +92,7 @@ class DirStorage(JSONStorage):
                 'content': base64.encodestring(content)}
         with open(os.path.join(res_path, att_name), 'w') as f:
             json.dump(tree, f)
-        return Resource(att_name, content, **tree['metadata'])
+        return Resource(att_name, content, tree['metadata']['length'], tree['metadata']['mime'])
 
     def _iter_attachments(self, node_name):
         node = self[node_name]
@@ -102,3 +102,9 @@ class DirStorage(JSONStorage):
                 rpath = os.path.join(res_path, fname)
                 if os.path.isfile(rpath):
                     yield node.get_attachment(fname)
+
+    def _delete_attachment(self, node_name, att_name):
+        node = self[node_name]
+        res_path = "%s_resources" % node._fpath
+        att_path = os.path.join(res_path, att_name)
+        os.remove(att_path)

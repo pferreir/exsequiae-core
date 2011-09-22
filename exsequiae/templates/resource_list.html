@@ -12,11 +12,18 @@ filename='resources.js')}}"></script>
 {% endblock %}
 {% block content %}
 <div id="content">
-  <ul>
+  <table id="resource_list">
     {% for resource in storage_node: %}
-        <li>{{resource.name}}</li>
+        <tr class="resource" data-name="{{resource.name}}">
+          <td class="name">{{resource.name}}</td>
+          <td class="name">{{resource.size // 1024}} kb</td>
+          <td class="mime">{{resource.mime}}</td>
+          {% if 'username' in session: %}
+              <td><a href="#" class="delete">delete</a></td>
+          {% endif %}
+        </tr>
     {% endfor %}
-  </ul>
+  </table>
   {% if 'username' in session %}
   <div id="uploader">
     Javascript is off?

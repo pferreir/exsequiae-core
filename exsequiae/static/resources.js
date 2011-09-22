@@ -27,4 +27,13 @@ $(function() {
         }
         return false;
     });
+
+    $('#resource_list .resource .delete').click(function(){
+        var res = $(this).parents('.resource');
+        $.ajax({url: res.data('name'),
+                type: 'DELETE',
+                success: function(text) {
+                    res.fadeOut();
+                }});
+    })
 });

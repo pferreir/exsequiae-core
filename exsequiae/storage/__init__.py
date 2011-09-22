@@ -48,15 +48,15 @@ class ResourceNotFoundError(Exception):
 
 class Resource(object):
 
-    def __init__(self, name, data, length, mime):
+    def __init__(self, name, data, size, mime):
         self.name = name
         self.data = data
-        self.lenght = length
+        self.size = size
         self.mime = mime
 
     @property
     def metadata(self):
-        return dict((k, getattr(self, k)) for k in ['length', 'mime'])
+        return dict((k, getattr(self, k)) for k in ['size', 'mime'])
 
 
 class Storage(object):
@@ -187,6 +187,10 @@ class DocNode(object):
 
     def __iter__(self):
         return self._storage._iter_attachments(self._name)
+
+    def __delitem__(self, name):
+        self._storage.cache.delete("%s_%s" % (self._name, name))
+        return self._storage._delete_attachment(self._name, name)
 
 class JSONStorage(Storage):
 

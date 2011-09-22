@@ -83,3 +83,7 @@ class CouchStorage(JSONStorage):
         if '_attachments' in node.tree:
             for fname in node.tree['_attachments']:
                 yield node.get_attachment(fname)
+
+    def _delete_attachment(self, node_name, att_name):
+        self.cache.delete(node_name)
+        self._db.delete_attachment(self._get(node_name), att_name)
