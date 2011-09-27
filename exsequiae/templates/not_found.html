@@ -1,4 +1,10 @@
 {% extends 'page.html' %}
+{% block includes %}
+  {{ super() }}
+  {% if 'username' in session %}
+    <script type="text/javascript" src="{{url_for('static', filename='editor.js')}}"></script>
+  {% endif %}
+{% endblock %}
 {% block content %}
 <div id="content">
   This term doesn't exist. Do you want to <a id="term_create" href="#">create a new one</a>?
