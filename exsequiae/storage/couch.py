@@ -22,7 +22,7 @@ class CouchStorage(JSONStorage):
 
     def __init__(self, db, url=None, initialize=False, **kwargs):
         self._url = url or DEFAULT_BASE_URL
-        self._server = Server(url)
+        self._server = Server(self._url)
         self.unique_id = "%s_%s" % (self._url, db)
         super(CouchStorage, self).__init__(**kwargs)
 
