@@ -6,7 +6,7 @@ from flask import render_template, url_for, redirect, request, session, jsonify,
 
 
 LINK_PATTERNS = [
-    (re.compile(r"\[([\w]*)\]", re.I), lambda m: url_for('defs.term_definition', term=m.group(1)))
+    (re.compile(r"\[\[([\w]*)\]\]", re.I), lambda m: url_for('defs.term_definition', term=m.group(1)), r'\1')
     ]
 
 

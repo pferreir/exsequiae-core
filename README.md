@@ -15,6 +15,7 @@ Place it at /path/to/environment/exsequiae.cfg
 
 ```python
 SITE_TITLE = 'My site'
+AUTHOR_NAME = 'My name'
 STARTING_YEAR = 2009
 DEFAULT_PAGE = 'Start'
 ADMIN_USERNAME = 'myusername'

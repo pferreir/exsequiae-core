@@ -498,6 +498,8 @@ var _DoAnchors = function(text) {
 	*/
 	text = text.replace(/(\[([^\[\]]+)\])()()()()()/g, writeAnchorTag);
 
+	text = text.replace(/(\[\[([^\[\]]+)\]\])()()()()()/g, writeAnchorTag);
+
 	return text;
 }
 
@@ -509,7 +511,11 @@ var writeAnchorTag = function(wholeMatch,m1,m2,m3,m4,m5,m6,m7) {
 	var url		= m4;
 	var title	= m7;
 	
-	if (url == "") {
+        // wiki links
+        if (whole_match.substr(0, 2) == '[[') {
+                url = '../' + link_text;
+        } else if (url == "") {
+                // references
 		if (link_id == "") {
 			// lower-case and turn embedded newlines into spaces
 			link_id = link_text.toLowerCase().replace(/ ?\n/g," ");
