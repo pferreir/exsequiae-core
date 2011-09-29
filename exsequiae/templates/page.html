@@ -26,16 +26,17 @@ $(function() {
 <div id="page">
   <h1><a href="{{url_for('defs.index')}}">{{site_title}}</a> <small>{{term}}</small></h1>
 {% block content %}
-<div id="metadata">
-  {% if metadata.get('type',None) %}
-      <span class="type">{{metadata['type']}}</span>
-  {% endif %}
-  {% if metadata.get('language',None) %}
-      <span class="language">{{metadata['language']}}</span>
-  {% endif %}
-</div>
 
 <div id="content">
+  <div id="metadata">
+    {% if metadata.get('type',None) %}
+      <span class="type">{{metadata['type']}}</span>
+    {% endif %}
+    {% if metadata.get('language',None) %}
+      <span class="language">{{metadata['language']}}</span>
+    {% endif %}
+</div>
+
 {% if metadata.get('status',None) == 'incomplete' %}
     <span class="warning">This text is still unfinished</span>
 {% endif %}
