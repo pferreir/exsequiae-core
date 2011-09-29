@@ -50,13 +50,15 @@ $(function() {
 
 </div>
 <div id="footer">
+  <span class="sign">❧</span>
+  <span>
   {{author_name}}
   {% if metadata.get('date',None) %}
       {{metadata['date'].strftime("%Y")}}
   {% else %}
       {{', '.join(years)}}
   {% endif %}
-
+  </span>
 </div>
 {% endblock %}
 </div>

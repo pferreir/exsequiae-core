@@ -1,7 +1,7 @@
 body {
   font-family: georgia;
   margin: 0;
-  background-color: #D3C19A;
+  background-color: #eee;
 }
 
 h1 {
@@ -9,7 +9,6 @@ h1 {
   font-weight: normal;
   font-size: 30pt;
   padding: 10px;
-  background-color: #D3C19A;
   color: #444;
   border-bottom: 1 px solid #715F3A;
 }
@@ -25,17 +24,42 @@ h1 a {
 }
 
 div#content {
-              padding: 10px;
-              min-height: 400px;
-              background: white;
+    padding: 10px 20px 10px 20px;
+    margin: 10px 10px 0px 10px;
+    min-height: 400px;
+    background: white;
+    border-width: 1px;
+    border-style: solid;
+    border-bottom-color: #aaa;
+    border-right-color: #aaa;
+    border-top-color: #ddd;
+    border-left-color: #ddd;
+    border-radius: 5px;
+}
+
+div#content p {
+    text-indent: 1em;
+}
+
+div#content p:first-letter {
+    font-size: 20px;
 }
 
 div#footer {
-  padding: 10px;
+  padding-right: 10px;
   color: #555;
   text-align: right;
-  background-color: #D3C19A;
-  border-top: 1px solid #715F3A;
+  line-height: 40px;
+}
+
+div#footer span {
+    vertical-align: middle;
+    line-height: 20px;
+}
+
+div#footer span.sign {
+    vertical-align: middle;
+    font-size: 30px;
 }
 
 span.language {
