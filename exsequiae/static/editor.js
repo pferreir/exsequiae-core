@@ -91,7 +91,7 @@ function showEditor(term) {
         function() {
             var button = $(this);
             var state = $('#edit_textarea').markeditGetState();
-            var text = state.beforeSelect + state.select + state.afterSelect;
+            var text = state.beforeSelect + state.select + state.afterSelect + state.links;
             button.attr("disabled", true)
             $.ajax({'type': 'POST',
                     'url': '../' + term + '/',
